@@ -1,8 +1,28 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
 import numpy as np
 import matplotlib.pyplot as plt
 
+def create_model(input_shape):
+    model = Sequential()
+    
+    # LSTM layers for sequential data
+    model.add(LSTM(128, input_shape=input_shape, return_sequences=True))
+    model.add(Dropout(0.5))
+    model.add(LSTM(64, return_sequences=False))
+    model.add(Dropout(0.4))
+    
+    # Fully connected layers
+    model.add(Dense(64, activation='relu'))
+    model.add(Dropout(0.3))
+    model.add(Dense(3, activation='softmax'))  # 3 outputs: accept, reject (2 persons), reject (time shift)
+    
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    
+    return model
 
 # تنظیمات عمومی
 sampling_rate = 100  # نرخ نمونه‌برداری (در هر ثانیه)
