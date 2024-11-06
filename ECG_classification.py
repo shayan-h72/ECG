@@ -98,6 +98,32 @@ def generate_more_data(samples=1000):
     
     return np.array(data), np.array(labels)
 
+# رسم نمودار دقت و خطا
+def plot_history(history):
+    plt.figure(figsize=(12, 5))
+    
+    # دقت
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['accuracy'], label='Train Accuracy')
+    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+    plt.title('Accuracy over Epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    
+    # خطا
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history['loss'], label='Train Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Loss over Epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+
+
 # تولید داده‌های مصنوعی
 X, y = generate_more_data(samples=10000)
 
@@ -122,3 +148,6 @@ history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_split
 # ارزیابی مدل روی داده‌های تست
 loss, accuracy = model.evaluate(X_test, y_test)
 print(f'Test Accuracy: {accuracy * 100:.2f}%')
+
+# رسم نمودار
+plot_history(history)
