@@ -5,6 +5,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.utils import to_categorical
 
 def create_model(input_shape):
     model = Sequential()
@@ -71,3 +73,52 @@ def plot_signals(data):
 data = generate_data()
 plot_signals(data)
 
+
+# تولید داده‌های بیشتر
+def generate_more_data(samples=1000):
+    data, labels = [], []
+    for _ in range(samples):
+        signal_person1 = generate_ecg_signal(frequency=np.random.uniform(0.8, 1.2))
+        signal_person2 = generate_ecg_signal(frequency=np.random.uniform(1.3, 1.8))
+        
+        # حالت 1: یک شخص (پذیرش)
+        data.append(signal_person1)
+        labels.append(0)
+        
+        # حالت 2: دو شخص مختلف (رد)
+        combined_signal = (signal_person1 + signal_person2) / 2
+        data.append(combined_signal)
+        labels.append(1)
+        
+        # حالت 3: شیفت زمانی (رد)
+        time_shift = int(0.2 * sampling_rate)
+        shifted_signal = np.roll(signal_person1, shift=time_shift)
+        data.append(shifted_signal)
+        labels.append(2)
+    
+    return np.array(data), np.array(labels)
+
+# تولید داده‌های مصنوعی
+X, y = generate_more_data(samples=10000)
+
+# تبدیل برچسب‌ها به دسته‌بندی‌های One-hot
+y_categorical = to_categorical(y, num_classes=3)
+
+# تقسیم داده‌ها به مجموعه آموزش و تست
+X_train, X_test, y_train, y_test = train_test_split(X, y_categorical, test_size=0.2, random_state=42)
+
+
+# تغییر شکل داده‌ها برای مدل LSTM
+X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
+X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
+
+input_shape = (X_train.shape[1], 1)  # شکل ورودی برای LSTM
+model = create_model(input_shape)
+
+
+# آموزش مدل
+history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_split=0.2)
+
+# ارزیابی مدل روی داده‌های تست
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f'Test Accuracy: {accuracy * 100:.2f}%')
